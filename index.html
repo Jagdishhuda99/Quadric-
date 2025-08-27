@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>65 प्रश्न — गणित MCQ टेस्ट</title>
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f1724; --muted:#9ca3af; --text:#e6eef8;
+    --ok:#16a34a; --err:#ef4444; --opt-bg:#0e1a2b;
+  }
+  body{
+    margin:0;
+    font-family:system-ui,Segoe UI,Roboto,Arial;
+    background:linear-gradient(180deg,#071021,#081226);
+    color:var(--text);
+    padding:12px;
+  }
+  header{
+    max-width:1100px;margin:0 auto 18px;
+    padding:18px;border-radius:12px;
+    background:linear-gradient(90deg,#0f172a,#071a2a);
+    box-shadow:0 8px 30px rgba(2,6,23,.7);
+  }
+  header h1{margin:0;font-size:1.3rem}
+  .wrap{max-width:1100px;margin:0 auto;}
+  .controls{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    margin:12px 0;
+  }
+  button{
+    background:#1f6feb;border:0;padding:10px 14px;
+    border-radius:10px;color:white;cursor:pointer;
+    font-size:0.95rem;
+  }
+  button.danger{background:#ef4444}
+  .grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  }
+  @media(max-width:900px){
+    .grid{grid-template-columns:1fr;}
+  }
+  .card{
+    background:var(--card);padding:12px;
+    border-radius:12px;border:1px solid rgba(255,255,255,.03);
+  }
+  .qnum{
+    width:36px;height:36px;border-radius:8px;
+    background:#071428;color:#93c5fd;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-weight:700;margin-right:10px;
+    flex-shrink:0;
+  }
+  .qtitle{display:flex;align-items:flex-start;gap:8px}
+  .opts{margin-top:10px;display:grid;gap:8px}
+  .opt{
+    display:flex;gap:10px;align-items:center;
+    padding:10px;border-radius:8px;background:var(--opt-bg);
+    border:1px solid rgba(255,255,255,.02);cursor:pointer
+  }
+  .opt input{transform:scale(1.05)}
+  .opt.correct{
+    border-color:var(--ok);
+    box-shadow:0 6px 20px rgba(16,185,129,.08);
+    background:linear-gradient(90deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02));
+  }
+  .opt.wrong{
+    border-color:var(--err);
+    box-shadow:0 6px 20px rgba(239,68,68,.06);
+    background:linear-gradient(90deg, rgba(239,68,68,0.04), rgba(239,68,68,0.01));
+  }
+  .resultBar{
+    display:flex;justify-content:space-between;align-items:center;margin:14px 0;gap:8px;
+    flex-wrap:wrap;
+  }
+  .timer, #scoreBox{
+    background:#071428;padding:8px 12px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.03);
+    min-width:100px;text-align:center;
+    font-size:0.9rem;
+  }
+  #scoreBox{min-width:140px;}
+  .note{color:var(--muted);font-size:0.95rem}
+  .bottomActions{
+    display:flex;gap:10px;flex-wrap:wrap;margin-top:12px
+  }
+  .bottomActions button{flex:1;min-width:140px}
+  .hidden{display:none}
+  .meta{font-size:0.9rem;color:var(--muted);margin-top:6px}
+
+  /* Mobile friendly tweaks */
+  @media(max-width:600px){
+    header h1{font-size:1.1rem}
+    .controls{flex-direction:column;align-items:stretch}
+    .controls > div{width:100%}
+    button{width:100%}
+    .opt{font-size:0.9rem;padding:8px}
+    .qnum{width:30px;height:30px;font-size:0.9rem}
+  }
+</style>
+</head>
+<body>
+  <header class="wrap">
+    <h1>गणित MCQ टेस्ट — 65 प्रश्न</h1>
+    <div class="meta">पहले 65 प्रश्न के लिए इंटरैक्टिव क्विज — सही/गलत तुरंत दिखेगा और अंतिम स्कोर अपडेट होगा।</div>
+  </header>
+
+  <main class="wrap">
+    <div class="controls card">
+      <div style="flex:1">
+        <label class="note">
+          समय (मिनट):
+          <input id="duration" type="number" value="130" min="1" style="width:80px;margin-left:8px"/>
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="timer" id="timer">--:--</div>
+        <div id="scoreBox">स्कोर: 0 / 65</div>
+        <button id="startBtn">परीक्षा शुरू करें</button>
+        <button id="submitBtn">सबमिट करें</button>
+        <button id="resetBtn" class="danger">रीसेट</button>
+      </div>
+    </div>
+
+    <div id="questionsArea" class="grid" style="margin-top:12px"></div>
+
+    <div class="bottomActions" style="display:none;">
+        <button id="downloadResp">उत्तर JSON डाउनलोड</button>
+        <button id="downloadTemplate">खाली JSON टेम्पलेट डाउनलोड</button>
+    </div>
+
+
+    <div id="finalResult" class="card hidden" style="margin-top:12px">
+      <h3>परिणाम</h3>
+      <p id="finalScore" style="font-size:1.1rem">आपका स्कोर: <strong>0</strong> / 65</p>
+      <div class="note">हरे रंग वाले विकल्प सही हैं; लाल रंग वाले विकल्प आपने चुने और वे गलत हैं।</div>
+    </div>
+  </main>
+
+<script>
+/* ==================== QUESTIONS PLACEHOLDER ==================== */
+const questions = Array.from({length:65}, (_,i) => ({
+  id: i+1,
+  text: `प्रश्न ${i+1}: (यहाँ सवाल का पाठ रखें — PDF से बदलें)`,
+  options: ["विकल्प A","विकल्प B","विकल्प C","विकल्प D"]
+}));
+
+/* ANSWER KEY (1..65) */
+const correctAnswers = [
+  1,0,1,2,1,1,1,3,3,1,
+  3,0,1,0,2,2,3,2,0,1,
+  1,2,0,2,0,0,1,0,2,2,
+  2,0,2,1,0,2,2,0,2,1,
+  3,1,1,0,3,1,1,0,1,2,
+  1,1,1,2,1,3,2,0,1,0,
+  1,1,2,2,1
+];
+
+// State
+let responses = {}, started=false, endsAt=null, timerInterval=null;
+const qArea = document.getElementById('questionsArea');
+const scoreBox = document.getElementById('scoreBox');
+const finalResult = document.getElementById('finalResult');
+const finalScore = document.getElementById('finalScore');
+const timerEl = document.getElementById('timer');
+
+/* RENDER QUESTIONS */
+function renderQuestions(){
+  qArea.innerHTML = '';
+  for(const q of questions){
+    const card = document.createElement('div'); card.className='card';
+    const qtitle = document.createElement('div'); qtitle.className='qtitle';
+    const qnum = document.createElement('div'); qnum.className='qnum'; qnum.textContent = q.id;
+    const qtxt = document.createElement('div'); qtxt.innerHTML = `<div style="font-weight:600">${q.text}</div><div class="meta"></div>`;
+    qtitle.appendChild(qnum); qtitle.appendChild(qtxt);
+    card.appendChild(qtitle);
+
+    const opts = document.createElement('div'); opts.className='opts';
+    q.options.forEach((optText, idx) => {
+      const label = document.createElement('label');
+      label.className = 'opt'; label.setAttribute('data-q', q.id); label.setAttribute('data-idx', idx);
+      const input = document.createElement('input');
+      input.type='radio'; input.name = 'q'+q.id; input.value = idx;
+      input.addEventListener('change', (e)=>{
+        responses[q.id] = Number(e.target.value);
+        updateScorePreview();
+      });
+      const span = document.createElement('span'); span.textContent = optText;
+      label.appendChild(input); label.appendChild(span);
+      opts.appendChild(label);
+    });
+
+    card.appendChild(opts);
+    qArea.appendChild(card);
+  }
+}
+
+/* LIVE SCORE PREVIEW */
+function updateScorePreview(){
+  let correctCount = 0;
+  for(let i=1;i<=questions.length;i++){
+    if(responses[i] !== undefined && responses[i] === correctAnswers[i-1]) correctCount++;
+  }
+  scoreBox.textContent = `स्कोर (अभी): ${correctCount} / ${questions.length}`;
+}
+
+/* TIMER */
+function startExam(){
+  if(started) return;
+  started = true;
+  const mins = Math.max(1, Number(document.getElementById('duration').value)||15);
+  endsAt = Date.now() + mins*60*1000;
+  tickTimer(); timerInterval = setInterval(tickTimer, 1000);
+  document.getElementById('startBtn').disabled = true;
+}
+function tickTimer(){
+  if(!endsAt){ timerEl.textContent='--:--'; return; }
+  const left = endsAt - Date.now();
+  if(left <= 0){ timerEl.textContent='00:00'; clearInterval(timerInterval); submitQuiz(); return; }
+  const m = Math.floor(left/60000), s = Math.floor((left%60000)/1000);
+  timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+/* SUBMIT */
+function submitQuiz(){
+  let score = 0;
+  const cards = document.querySelectorAll('#questionsArea .card');
+  cards.forEach(card => {
+    const qid = Number(card.querySelector('.qnum').textContent);
+    const chosen = responses[qid];
+    const correct = correctAnswers[qid-1];
+    const optLabels = card.querySelectorAll('.opt');
+    optLabels.forEach(lbl=>{
+      const idx = Number(lbl.getAttribute('data-idx'));
+      lbl.classList.remove('correct','wrong');
+      if(idx === correct) lbl.classList.add('correct');
+      if(chosen !== undefined && idx === chosen && idx !== correct) lbl.classList.add('wrong');
+    });
+    if(chosen !== undefined && chosen === correct) score++;
+  });
+  finalResult.classList.remove('hidden');
+  finalScore.innerHTML = `आपका स्कोर: <strong>${score}</strong> / ${questions.length}`;
+  scoreBox.textContent = `स्कोर: ${score} / ${questions.length}`;
+  if(timerInterval) clearInterval(timerInterval);
+  started = false;
+  document.getElementById('startBtn').disabled = false;
+}
+
+/* RESET */
+function resetAll(){
+  if(confirm('क्या आप वाकई रीसैट करना चाहते हैं?')) {
+    responses = {};
+    document.querySelectorAll('#questionsArea input').forEach(i=>i.checked=false);
+    document.querySelectorAll('.opt').forEach(o=>o.classList.remove('correct','wrong'));
+    finalResult.classList.add('hidden'); scoreBox.textContent = `स्कोर: 0 / ${questions.length}`;
+    timerEl.textContent='--:--';
+    if(timerInterval) clearInterval(timerInterval);
+    started=false; endsAt=null;
+  }
+}
+
+/* DOWNLOAD JSON */
+function downloadResponses(){
+  const payload = { title:'गणित MCQ टेस्ट (65 प्रश्न)', submittedAt: new Date().toISOString(), responses };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'responses_65.json'; a.click();
+}
+function downloadTemplate(){
+  const templ = { title:'गणित MCQ टेस्ट — 65 प्रश्न', durationMinutes:15, questions };
+  const blob = new Blob([JSON.stringify(templ,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'questions_template_65.json'; a.click();
+}
+
+/* INIT */
+renderQuestions();
+document.getElementById('startBtn').addEventListener('click', startExam);
+document.getElementById('submitBtn').addEventListener('click', submitQuiz);
+document.getElementById('resetBtn').addEventListener('click', resetAll);
+document.getElementById('downloadResp').addEventListener('click', downloadResponses);
+document.getElementById('downloadTemplate').addEventListener('click', downloadTemplate);
+document.addEventListener('change', updateScorePreview);
+
+/* AUTO LOAD JSON */
+window.addEventListener('DOMContentLoaded', () => {
+  fetch('hhhhhhhh.json')
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data.questions) && data.questions.length > 0) {
+        for (let i = 0; i < Math.min(65, data.questions.length); i++) {
+          const q = data.questions[i];
+          questions[i].text = q.text || questions[i].text;
+          if (Array.isArray(q.options) && q.options.length >= 4) {
+            questions[i].options = q.options.slice(0, 4);
+          }
+        }
+        renderQuestions();
+        console.log("✅ JSON से प्रश्न अपने आप लोड हो गए");
+      }
+    })
+    .catch(err => {
+      console.warn("⚠ JSON फ़ाइल नहीं मिली, placeholder questions दिखेंगे।", err);
+    });
+});
+</script>
+</body>
+</html>
